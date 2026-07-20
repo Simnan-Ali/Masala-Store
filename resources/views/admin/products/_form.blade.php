@@ -17,14 +17,16 @@
 
                 <label class="form-label">Category <span class="text-danger">*</span></label>
 
-                <select name="category_id" id="category" class="form-select">
+                <select name="category_id"
+                        id="category"
+                        class="form-select">
 
                     <option value="">Select Category</option>
 
                     @foreach($categories as $category)
 
                         <option value="{{ $category->id }}"
-                            {{ old('category_id', $product->category_id ?? '') == $category->id ? 'selected' : '' }}>
+                            {{ old('category_id',$product->category_id ?? '')==$category->id?'selected':'' }}>
 
                             {{ $category->name }}
 
@@ -34,6 +36,10 @@
 
                 </select>
 
+                @error('category_id')
+                <div class="text-danger">{{ $message }}</div>
+                @enderror
+
             </div>
 
             {{-- Sub Category --}}
@@ -41,22 +47,32 @@
 
                 <label class="form-label">Sub Category <span class="text-danger">*</span></label>
 
-                <select name="sub_category_id" id="sub_category" class="form-select">
+                <select name="sub_category_id"
+                        id="sub_category"
+                        class="form-select">
 
                     <option value="">Select Sub Category</option>
 
-                    @foreach($subCategories as $subCategory)
+                    @if(isset($product))
 
-                        <option value="{{ $subCategory->id }}"
-                            {{ old('sub_category_id', $product->sub_category_id ?? '') == $subCategory->id ? 'selected' : '' }}>
+                    @foreach($subCategories->where('category_id',$product->category_id) as $sub)
 
-                            {{ $subCategory->name }}
+                    <option value="{{ $sub->id }}"
+                    {{ old('sub_category_id',$product->sub_category_id)==$sub->id?'selected':'' }}>
 
-                        </option>
+                    {{ $sub->name }}
+
+                    </option>
 
                     @endforeach
 
+                    @endif
+
                 </select>
+
+                @error('sub_category_id')
+                <div class="text-danger">{{ $message }}</div>
+                @enderror
 
             </div>
 
@@ -99,6 +115,10 @@
                        class="form-control"
                        value="{{ old('name', $product->name ?? '') }}">
 
+                @error('name')
+                <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+
             </div>
 
             {{-- Slug --}}
@@ -120,11 +140,11 @@
                 <label class="form-label">SKU</label>
 
                 <input type="text"
-                       id="sku"
-                       class="form-control"
-                       value="{{ old('sku', $product->sku ?? ('SKU'.time())) }}"
-                       readonly>
-
+                    name="sku"
+                    id="sku"
+                    class="form-control"
+                    value="{{ old('sku', $product->sku ?? $sku) }}"
+                    readonly>
             </div>
 
         </div>
@@ -259,12 +279,12 @@
                        name="thumbnail"
                        class="form-control">
 
-                <img id="thumbnailPreview"
-                     class="img-thumbnail mt-3"
-                     width="180"
-                     @if(isset($product) && $product->thumbnail)
-                        src="{{ asset('storage/'.$product->thumbnail) }}"
-                     @endif>
+                <img
+                id="thumbnailPreview"
+                src="{{ isset($product) && $product->thumbnail ? asset('storage/'.$product->thumbnail) : '' }}"
+                class="img-thumbnail mt-3"
+                width="180"
+                style="{{ isset($product) && $product->thumbnail ? '' : 'display:none;' }}">
 
             </div>
 
@@ -286,6 +306,45 @@
                      class="d-flex flex-wrap gap-2 mt-3">
 
                 </div>
+
+                @if(isset($product) && $product->images->count())
+
+                <hr>
+
+                <h6>Existing Gallery</h6>
+
+                <div class="d-flex flex-wrap gap-3">
+
+                @foreach($product->images as $image)
+
+                <div class="text-center">
+
+                    <img src="{{ asset('storage/'.$image->image) }}"
+                        width="100"
+                        class="img-thumbnail">
+
+                    <form action="{{ route('admin.products.gallery.destroy',$image) }}"
+                        method="POST"
+                        class="mt-2">
+
+                        @csrf
+                        @method('DELETE')
+
+                        <button class="btn btn-danger btn-sm">
+
+                            Delete
+
+                        </button>
+
+                    </form>
+
+                </div>
+
+                @endforeach
+
+                </div>
+
+                @endif
 
             </div>
 
@@ -334,6 +393,7 @@
 
             <textarea
                 name="description"
+                id="description"
                 rows="6"
                 class="form-control">{{ old('description',$product->description ?? '') }}</textarea>
 
@@ -454,46 +514,109 @@
 
 <script>
 
-document.getElementById('name').addEventListener('keyup',function(){
+$(document).ready(function () {
 
-let slug=this.value
-.toLowerCase()
-.trim()
-.replace(/\s+/g,'-')
-.replace(/[^\w-]+/g,'');
+    // ===========================
+    // Auto Slug
+    // ===========================
+    $('#name').on('keyup', function () {
 
-document.getElementById('slug').value=slug;
+        let slug = $(this).val()
+            .toLowerCase()
+            .trim()
+            .replace(/\s+/g, '-')
+            .replace(/[^\w-]+/g, '');
+
+        $('#slug').val(slug);
+
+    });
+
+    // ===========================
+    // Load Sub Categories
+    // ===========================
+    $('#category').on('change', function () {
+
+        let id = $(this).val();
+
+        if (id == '') {
+
+            $('#sub_category').html('<option value="">Select Sub Category</option>');
+            return;
+        }
+
+        $.ajax({
+
+            url: "{{ url('admin/get-subcategories') }}/" + id,
+            type: "GET",
+            dataType: "json",
+
+            success: function (response) {
+
+                let html = '<option value="">Select Sub Category</option>';
+
+                $.each(response, function (index, item) {
+
+                    html += '<option value="' + item.id + '">' + item.name + '</option>';
+
+                });
+
+                $('#sub_category').html(html);
+
+            },
+
+            error: function () {
+
+                alert('Unable to load Sub Categories.');
+
+            }
+
+        });
+
+    });
+
+    // ===========================
+    // Thumbnail Preview
+    // ===========================
+    $('#thumbnail').change(function () {
+
+        let file = this.files[0];
+
+        if (file) {
+
+            $('#thumbnailPreview')
+                .attr('src', URL.createObjectURL(file))
+                .show();
+
+        }
+
+    });
+
+    // ===========================
+    // Gallery Preview
+    // ===========================
+    $('#gallery').change(function () {
+
+        $('#galleryPreview').html('');
+
+        $.each(this.files, function (index, file) {
+
+            $('#galleryPreview').append(
+
+                '<img src="' + URL.createObjectURL(file) + '" class="img-thumbnail me-2 mb-2" width="100">'
+
+            );
+
+        });
+
+    });
 
 });
 
-document.getElementById('thumbnail').onchange=function(e){
-
-document.getElementById('thumbnailPreview').src=
-URL.createObjectURL(e.target.files[0]);
-
-}
-
-document.getElementById('gallery').onchange=function(){
-
-let preview=document.getElementById('galleryPreview');
-
-preview.innerHTML='';
-
-Array.from(this.files).forEach(file=>{
-
-let img=document.createElement('img');
-
-img.src=URL.createObjectURL(file);
-
-img.width=100;
-
-img.className='img-thumbnail';
-
-preview.appendChild(img);
-
+ClassicEditor
+.create(document.querySelector('#description'))
+.catch(error => {
+    console.error(error);
 });
-
-}
 
 </script>
 

@@ -11,14 +11,18 @@ use App\Models\Brand;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use App\Models\ProductImage;
 
 class ProductController extends Controller
 {
     public function getSubCategories($categoryId)
     {
-        return SubCategory::where('category_id',$categoryId)
-            ->where('status',1)
-            ->get();
+        $subCategories = SubCategory::where('category_id', $categoryId)
+            ->where('status', 1)
+            ->orderBy('name')
+            ->get(['id', 'name']);
+
+        return response()->json($subCategories);
     }
 
     public function index(Request $request)
@@ -51,12 +55,20 @@ class ProductController extends Controller
         ));
     }
 
+   
     public function create()
     {
-        return view('admin.products.create',[
-            'categories'=>Category::where('status',1)->get(),
-            'subCategories'=>SubCategory::where('status',1)->get(),
-            'brands'=>Brand::where('status',1)->get(),
+        $lastProduct = Product::latest('id')->first();
+
+        $nextId = $lastProduct ? $lastProduct->id + 1 : 1;
+
+        $sku = 'MS-' . date('Ymd') . '-' . str_pad($nextId, 4, '0', STR_PAD_LEFT);
+
+        return view('admin.products.create', [
+            'categories'    => Category::where('status',1)->get(),
+            'subCategories' => SubCategory::where('status',1)->get(),
+            'brands'        => Brand::where('status',1)->get(),
+            'sku'           => $sku,
         ]);
     }
 
@@ -64,77 +76,61 @@ class ProductController extends Controller
     {
         $thumbnail = null;
 
-        if($request->hasFile('thumbnail')){
-
+        if ($request->hasFile('thumbnail')) {
             $thumbnail = $request->file('thumbnail')
-                ->store('products','public');
+                ->store('products', 'public');
         }
+        $lastProduct = Product::latest('id')->first();
+
+        $nextId = $lastProduct ? $lastProduct->id + 1 : 1;
+
+        $sku = 'MS-' . date('Ymd') . '-' . str_pad($nextId, 4, '0', STR_PAD_LEFT);
 
         $product = Product::create([
-
-            'category_id'=>$request->category_id,
-
-            'sub_category_id'=>$request->sub_category_id,
-
-            'brand_id'=>$request->brand_id,
-
-            'name'=>$request->name,
-
-            'slug'=>Str::slug($request->name),
-
-            'sku'=>'SKU'.time(),
-
-            'purchase_price'=>$request->purchase_price,
-
-            'mrp'=>$request->mrp,
-
-            'selling_price'=>$request->selling_price,
-
-            'stock'=>$request->stock,
-
-            'weight'=>$request->weight,
-
-            'unit'=>$request->unit,
-
-            'thumbnail'=>$thumbnail,
-
-            'short_description'=>$request->short_description,
-
-            'description'=>$request->description,
-
-            'featured'=>$request->featured ?? 0,
-
-            'trending'=>$request->trending ?? 0,
-
-            'status'=>$request->status,
-
+            'category_id'       => $request->category_id,
+            'sub_category_id'   => $request->sub_category_id,
+            'brand_id'          => $request->brand_id,
+            'name'              => $request->name,
+            'slug'              => Str::slug($request->name),
+            'sku'               => $sku,
+            'purchase_price'    => $request->purchase_price,
+            'mrp'               => $request->mrp,
+            'selling_price'     => $request->selling_price,
+            'stock'             => $request->stock,
+            'weight'            => $request->weight,
+            'unit'              => $request->unit,
+            'thumbnail'         => $thumbnail,
+            'short_description' => $request->short_description,
+            'description'       => $request->description,
+            'featured'          => $request->boolean('featured'),
+            'trending'          => $request->boolean('trending'),
+            'status'            => $request->status,
         ]);
 
-        if($request->hasFile('gallery')){
+        if ($request->hasFile('gallery')) {
 
-            foreach($request->file('gallery') as $image){
+            foreach ($request->file('gallery') as $image) {
 
                 $product->images()->create([
-
-                    'image'=>$image->store('products/gallery','public')
-
+                    'image' => $image->store('products/gallery', 'public')
                 ]);
-
             }
-
         }
+
         return redirect()
             ->route('admin.products.index')
-            ->with('success','Product Added Successfully');
+            ->with('success', 'Product Added Successfully');
     }
 
     public function edit(Product $product)
     {
-        return view('admin.products.edit',[
-            'product'=>$product,
-            'categories'=>Category::where('status',1)->get(),
-            'subCategories'=>SubCategory::where('status',1)->get(),
-            'brands'=>Brand::where('status',1)->get(),
+        $product->load('images');
+
+        return view('admin.products.edit', [
+            'product'       => $product,
+            'categories'    => Category::where('status',1)->get(),
+            'subCategories' => SubCategory::where('status',1)->get(),
+            'brands'        => Brand::where('status',1)->get(),
         ]);
     }
 
@@ -180,6 +176,15 @@ class ProductController extends Controller
 
         ]);
 
+        if ($request->hasFile('gallery')) {
+
+            foreach ($request->file('gallery') as $image) {
+
+                $product->images()->create([
+                    'image' => $image->store('products/gallery', 'public')
+                ]);
+            }
+        }
         return redirect()
             ->route('admin.products.index')
             ->with('success','Product Updated Successfully');
@@ -191,10 +196,30 @@ class ProductController extends Controller
             Storage::disk('public')->delete($product->thumbnail);
         }
 
+        foreach ($product->images as $image) {
+
+            if ($image->image && Storage::disk('public')->exists($image->image)) {
+                Storage::disk('public')->delete($image->image);
+            }
+        }
+
+        $product->images()->delete();
+
         $product->delete();
 
         return redirect()
             ->route('admin.products.index')
-            ->with('success','Product Deleted Successfully');
+            ->with('success', 'Product Deleted Successfully');
     }
+
+    public function destroyGallery(ProductImage $image)
+    {
+        if ($image->image && Storage::disk('public')->exists($image->image)) {
+            Storage::disk('public')->delete($image->image);
+        }
+
+        $image->delete();
+
+        return back()->with('success', 'Gallery Image Deleted Successfully');
+}
 }

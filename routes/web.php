@@ -36,8 +36,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('sub-categories', SubCategoryController::class);
         Route::resource('brands', BrandController::class);
         Route::resource('products', ProductController::class);
-        Route::get( 'sub-category/{category}', [ProductController::class,'getSubCategories']
-        )->name('products.subcategories');
+        
+        Route::get('/get-subcategories/{category}', [ProductController::class, 'getSubCategories'])
+        ->name('products.getSubCategories');
+
+        Route::delete( 'products/gallery/{image}', [ProductController::class,'destroyGallery']
+        )->name('products.gallery.destroy');
 
         Route::post('/logout', [AuthController::class, 'logout'])
             ->name('logout');

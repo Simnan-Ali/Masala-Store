@@ -35,6 +35,8 @@ class ProductRequest extends FormRequest
 
             'thumbnail'         => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
 
+            'gallery.*' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+
             'status'            => 'required|boolean',
 
         ];
