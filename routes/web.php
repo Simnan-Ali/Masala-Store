@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\SubCategoryController;
 use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\ProductVariantController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -33,18 +34,24 @@ Route::prefix('admin')->name('admin.')->group(function () {
             ->name('dashboard');
 
         Route::resource('categories', CategoryController::class);
+
         Route::resource('sub-categories', SubCategoryController::class);
+
         Route::resource('brands', BrandController::class);
+
         Route::resource('products', ProductController::class);
-        
         Route::get('/get-subcategories/{category}', [ProductController::class, 'getSubCategories'])
         ->name('products.getSubCategories');
-
         Route::delete( 'products/gallery/{image}', [ProductController::class,'destroyGallery']
         )->name('products.gallery.destroy');
-
         Route::post( 'products/{product}/change-status', [ProductController::class,'changeStatus']
         )->name('products.change-status');
+
+        Route::resource('product-variants', ProductVariantController::class);
+        Route::get('products/{product}/variants', [ProductVariantController::class,'index']
+        )->name('products.variants');
+        Route::post('product-variants/{variant}/change-status', [ProductVariantController::class,'changeStatus']
+        )->name('product-variants.change-status');
 
         Route::post('/logout', [AuthController::class, 'logout'])
             ->name('logout');

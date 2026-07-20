@@ -194,6 +194,14 @@
 
                             </a>
 
+                            <a href="{{ route('admin.products.variants',$product) }}"
+                                class="btn btn-info btn-sm">
+
+                                    <i class="fa fa-boxes"></i>
+
+                            </a>
+
+
                             <form class="deleteForm d-inline" method="POST" action="{{ route('admin.products.destroy',$product) }}">
 
                                 @csrf @method('DELETE')

@@ -127,7 +127,7 @@ class ProductController extends Controller
 
     public function edit(Product $product)
     {
-        $product->load('images');
+        $product->load('images','variants');
 
         return view('admin.products.edit', [
             'product'       => $product,
