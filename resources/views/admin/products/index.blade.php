@@ -28,64 +28,50 @@
 
         <form method="GET" class="row mb-4">
 
-            <div class="col-md-4">
-
-                <input type="text" name="search" class="form-control" placeholder="Search Product..." value="{{ request('search') }}">
-
+            <div class="col-md-3">
+                <input type="text"
+                    name="search"
+                    class="form-control"
+                    placeholder="Search Product..."
+                    value="{{ request('search') }}">
             </div>
 
             <div class="col-md-3">
-
                 <select name="category" class="form-select">
-
-                    <option value="">
-
-                        All Categories
-
-                    </option>
+                    <option value="">All Categories</option>
 
                     @foreach($categories as $category)
-
-                    <option value="{{ $category->id }}" {{ request( 'category')==$category->id?'selected':'' }}> {{ $category->name }}
-
-                    </option>
-
+                        <option value="{{ $category->id }}"
+                            {{ request('category') == $category->id ? 'selected' : '' }}>
+                            {{ $category->name }}
+                        </option>
                     @endforeach
-
                 </select>
-
             </div>
 
             <div class="col-md-3">
-
                 <select name="brand" class="form-select">
-
-                    <option value="">
-
-                        All Brands
-
-                    </option>
+                    <option value="">All Brands</option>
 
                     @foreach($brands as $brand)
-
-                    <option value="{{ $brand->id }}" {{ request( 'brand')==$brand->id?'selected':'' }}> {{ $brand->name }}
-
-                    </option>
-
+                        <option value="{{ $brand->id }}"
+                            {{ request('brand') == $brand->id ? 'selected' : '' }}>
+                            {{ $brand->name }}
+                        </option>
                     @endforeach
-
                 </select>
-
             </div>
 
-            <div class="col-md-2">
-
-                <button class="btn btn-dark w-100">
-
-                    Search
-
+            <div class="col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-dark">
+                    <i class="fa fa-search"></i> Search
                 </button>
 
+                @if(request()->filled('search') || request()->filled('category') || request()->filled('brand'))
+                    <a href="{{ route('admin.products.index') }}" class="btn btn-danger">
+                        <i class="fa fa-times"></i> Clear
+                    </a>
+                @endif
             </div>
 
         </form>
@@ -130,13 +116,18 @@
 
                 <tr>
 
-                    <td>{{ $loop->iteration }}</td>
+                    <td>{{ $products->firstItem()+$loop->index }}</td>
 
                     <td>
 
                         @if($product->thumbnail)
-
-                        <img src="{{ asset('storage/'.$product->thumbnail) }}" width="70" class="rounded"> @endif
+                            <img
+                            src="{{ asset('storage/'.$product->thumbnail) }}"
+                            width="70"
+                            height="70"
+                            class="rounded border"
+                            style="object-fit:cover"> 
+                        @endif
 
                     </td>
 
@@ -152,38 +143,30 @@
 
                     <td>
 
-                        @if($product->stock>0)
-
-                        <span class="badge bg-success">
-
-                                {{ $product->stock }}
-
-                            </span> @else
-
-                        <span class="badge bg-danger">
-
-                                Out of Stock
-
-                            </span> @endif
+                       @if($product->stock==0)
+                            <span class="badge bg-danger">
+                            Out Of Stock
+                            </span>
+                            @elseif($product->stock<=10)
+                            <span class="badge bg-warning">
+                            Low Stock ({{ $product->stock }})
+                            </span>
+                            @else
+                            <span class="badge bg-success">
+                            {{ $product->stock }}
+                            </span>
+                        @endif
 
                     </td>
 
                     <td>
-
-                        @if($product->status)
-
-                        <span class="badge bg-success">
-
-                                Active
-
-                            </span> @else
-
-                        <span class="badge bg-danger">
-
-                                Inactive
-
-                            </span> @endif
-
+                        <div class="form-check form-switch">
+                            <input
+                                class="form-check-input statusToggle"
+                                type="checkbox"
+                                data-id="{{ $product->id }}"
+                                {{ $product->status ? 'checked' : '' }}>
+                        </div>
                     </td>
 
                     <td>
@@ -240,46 +223,53 @@
 
         </table>
 
-        {{ $products->links() }}
-
+        {{ $products->links('pagination::bootstrap-5') }}
     </div>
 
 </div>
 
-@endsection @push('scripts')
+@endsection 
+@push('scripts')
 
 <script>
-    document.querySelectorAll('.deleteForm').forEach(function(form){
-    
-    form.addEventListener('submit',function(e){
-    
-    e.preventDefault();
-    
-    Swal.fire({
-    
-    title:'Delete Product?',
-    
-    text:'This product will be deleted.',
-    
-    icon:'warning',
-    
-    showCancelButton:true,
-    
-    confirmButtonText:'Delete'
-    
-    }).then((result)=>{
-    
-    if(result.isConfirmed){
-    
-    form.submit();
-    
-    }
-    
+    $('.deleteForm').submit(function(e){
+        e.preventDefault();
+        let form=this;
+        Swal.fire({
+            title:'Delete Product?',
+            text:'You cannot undo this action.',
+            icon:'warning',
+            showCancelButton:true,
+            confirmButtonColor:'#d33',
+            cancelButtonColor:'#3085d6',
+            confirmButtonText:'Yes, Delete'
+        }).then((result)=>{
+            if(result.isConfirmed){
+                form.submit();
+            }
+        });
     });
-    
+
+
+    $('.statusToggle').change(function(){
+    let id=$(this).data('id');
+    $.ajax({
+        url:'/admin/products/'+id+'/change-status',
+        type:'POST',
+        data:{
+            _token:"{{ csrf_token() }}"
+        },
+        success:function(){
+            Swal.fire({
+                icon:'success',
+                title:'Status Updated',
+                timer:1000,
+                showConfirmButton:false
+            });
+        }
     });
-    
-    });
+});
 </script>
+
 
 @endpush

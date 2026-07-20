@@ -43,6 +43,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::delete( 'products/gallery/{image}', [ProductController::class,'destroyGallery']
         )->name('products.gallery.destroy');
 
+        Route::post( 'products/{product}/change-status', [ProductController::class,'changeStatus']
+        )->name('products.change-status');
+
         Route::post('/logout', [AuthController::class, 'logout'])
             ->name('logout');
     });

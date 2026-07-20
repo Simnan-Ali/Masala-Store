@@ -225,5 +225,17 @@ class ProductController extends Controller
         $image->delete();
 
         return back()->with('success', 'Gallery Image Deleted Successfully');
-}
+    }
+
+    public function changeStatus(Product $product)
+    {
+        $product->status = !$product->status;
+
+        $product->save();
+
+        return response()->json([
+            'success'=>true,
+            'status'=>$product->status
+        ]);
+    }
 }

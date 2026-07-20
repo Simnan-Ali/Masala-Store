@@ -1,6 +1,4 @@
-@extends('admin.layouts.master')
-
-@section('content')
+@extends('admin.layouts.master') @section('content')
 
 <div class="card shadow">
 
@@ -10,12 +8,9 @@
             Brand Management
         </h4>
 
-        <a href="{{ route('admin.brands.create') }}"
-           class="btn btn-primary">
+        <a href="{{ route('admin.brands.create') }}" class="btn btn-primary">
 
-            <i class="fa fa-plus"></i>
-
-            Add Brand
+            <i class="fa fa-plus"></i> Add Brand
 
         </a>
 
@@ -25,70 +20,64 @@
 
         @if(session('success'))
 
-            <div class="alert alert-success">
+        <div class="alert alert-success">
 
-                {{ session('success') }}
+            {{ session('success') }}
 
-            </div>
+        </div>
 
         @endif
 
-        <form method="GET"
-              action="{{ route('admin.brands.index') }}"
-              class="row mb-3">
+        <form method="GET" action="{{ route('admin.brands.index') }}" class="row mb-3">
 
             <div class="col-md-4">
-
                 <input type="text"
-                       name="search"
-                       value="{{ request('search') }}"
-                       class="form-control"
-                       placeholder="Search Brand">
-
+                    name="search"
+                    value="{{ request('search') }}"
+                    class="form-control"
+                    placeholder="Search Brand">
             </div>
 
-            <div class="col-md-2">
-
-                <button class="btn btn-primary">
-
-                    <i class="fa fa-search"></i>
-
-                    Search
-
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fa fa-search"></i> Search
                 </button>
-
+                @if(request()->filled('search'))
+                    <a href="{{ route('admin.brands.index') }}" class="btn btn-danger">
+                        <i class="fa fa-times"></i> Clear Filter
+                    </a>
+                @endif
             </div>
 
         </form>
 
-        <table id="brandTable"
-               class="table table-bordered table-hover">
+        <table id="brandTable" class="table table-bordered table-hover">
 
             <thead class="table-dark">
 
-            <tr>
+                <tr>
 
-                <th>#</th>
+                    <th>#</th>
 
-                <th>Logo</th>
+                    <th>Logo</th>
 
-                <th>Name</th>
+                    <th>Name</th>
 
-                <th>Slug</th>
+                    <th>Slug</th>
 
-                <th>Description</th>
+                    <th>Description</th>
 
-                <th>Status</th>
+                    <th>Status</th>
 
-                <th width="180">Action</th>
+                    <th width="180">Action</th>
 
-            </tr>
+                </tr>
 
             </thead>
 
             <tbody>
 
-            @forelse($brands as $brand)
+                @forelse($brands as $brand)
 
                 <tr>
 
@@ -98,19 +87,13 @@
 
                         @if($brand->logo)
 
-                            <img src="{{ asset('storage/'.$brand->logo) }}"
-                                 width="70"
-                                 class="rounded">
+                        <img src="{{ asset('storage/'.$brand->logo) }}" width="70" class="rounded"> @else
 
-                        @else
-
-                            <span class="text-muted">
+                        <span class="text-muted">
 
                                 No Logo
 
-                            </span>
-
-                        @endif
+                            </span> @endif
 
                     </td>
 
@@ -136,40 +119,31 @@
 
                         @if($brand->status)
 
-                            <span class="badge bg-success">
+                        <span class="badge bg-success">
 
                                 Active
 
-                            </span>
+                            </span> @else
 
-                        @else
-
-                            <span class="badge bg-danger">
+                        <span class="badge bg-danger">
 
                                 Inactive
 
-                            </span>
-
-                        @endif
+                            </span> @endif
 
                     </td>
 
                     <td>
 
-                        <a href="{{ route('admin.brands.edit',$brand) }}"
-                           class="btn btn-warning btn-sm">
+                        <a href="{{ route('admin.brands.edit',$brand) }}" class="btn btn-warning btn-sm">
 
                             <i class="fa fa-edit"></i>
 
                         </a>
 
-                        <form class="deleteForm d-inline"
-                              action="{{ route('admin.brands.destroy',$brand) }}"
-                              method="POST">
+                        <form class="deleteForm d-inline" action="{{ route('admin.brands.destroy',$brand) }}" method="POST">
 
-                            @csrf
-
-                            @method('DELETE')
+                            @csrf @method('DELETE')
 
                             <button class="btn btn-danger btn-sm">
 
@@ -183,12 +157,11 @@
 
                 </tr>
 
-            @empty
+                @empty
 
                 <tr>
 
-                    <td colspan="7"
-                        class="text-center">
+                    <td colspan="7" class="text-center">
 
                         No Brand Found
 
@@ -196,58 +169,39 @@
 
                 </tr>
 
-            @endforelse
+                @endforelse
 
             </tbody>
 
         </table>
 
-        {{ $brands->links() }}
+        {{ $brands->links('pagination::bootstrap-5') }}
 
     </div>
 
 </div>
 
-@endsection
-
-@push('scripts')
+@endsection @push('scripts')
 
 <script>
+    new DataTable('#brandTable');
 
-new DataTable('#brandTable');
-
-document.querySelectorAll('.deleteForm').forEach(function(form){
-
-form.addEventListener('submit',function(e){
-
-e.preventDefault();
-
-Swal.fire({
-
-title:'Delete Brand?',
-
-text:'This brand will be deleted.',
-
-icon:'warning',
-
-showCancelButton:true,
-
-confirmButtonText:'Delete'
-
-}).then((result)=>{
-
-if(result.isConfirmed){
-
-form.submit();
-
-}
-
-});
-
-});
-
-});
-
+    document.querySelectorAll('.deleteForm').forEach(function(form){    
+        form.addEventListener('submit',function(e){    
+            e.preventDefault();    
+                Swal.fire({    
+                    title:'Delete Brand?',    
+                    text:'This brand will be deleted.',    
+                    icon:'warning',    
+                    showCancelButton:true,    
+                    confirmButtonText:'Delete'    
+                }).then((result)=>{    
+                if(result.isConfirmed){    
+                    form.submit();    
+                }    
+            });    
+        });    
+    });
 </script>
 
 @endpush

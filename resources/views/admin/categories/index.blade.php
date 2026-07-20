@@ -34,27 +34,26 @@
             class="row mb-3">
 
             <div class="col-md-4">
-
                 <input type="text"
                     class="form-control"
                     name="search"
                     placeholder="Search Category..."
                     value="{{ request('search') }}">
-
             </div>
 
-            <div class="col-md-2">
-
-                <button class="btn btn-primary">
-
-                    Search
-
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fa fa-search"></i> Search
                 </button>
 
+                @if(request()->filled('search'))
+                    <a href="{{ route('admin.categories.index') }}" class="btn btn-danger">
+                        <i class="fa fa-times"></i> Clear Filter
+                    </a>
+                @endif
             </div>
 
         </form>
-
         <table id="categoryTable" class="table table-bordered table-hover">
             <thead class="table-dark">
 
@@ -168,7 +167,8 @@
 
         </table>
 
-        {{ $categories->links() }}
+        {{ $categories->links('pagination::bootstrap-5') }}
+
 
     </div>
 
@@ -176,41 +176,22 @@
 
 <script>
 
-document
-.querySelectorAll('.deleteForm')
-.forEach(function(form){
-
-form.addEventListener('submit',function(e){
-
-e.preventDefault();
-
-Swal.fire({
-
-title:'Delete?',
-
-text:'Category will be deleted',
-
-icon:'warning',
-
-showCancelButton:true,
-
-confirmButtonText:'Delete'
-
-}).then((result)=>{
-
-if(result.isConfirmed){
-
-form.submit();
-
-}
-
+document .querySelectorAll('.deleteForm').forEach(function(form){
+    form.addEventListener('submit',function(e){
+        e.preventDefault();
+            Swal.fire({
+                title:'Delete?',
+                text:'Category will be deleted',
+                icon:'warning',
+                showCancelButton:true,
+                confirmButtonText:'Delete'
+            }).then((result)=>{
+            if(result.isConfirmed){
+                form.submit();
+            }
+        });
+    });
 });
-
-});
-
-});
-
-
 
 new DataTable('#categoryTable');
 
