@@ -102,6 +102,9 @@ class ProductController extends Controller
             'thumbnail'         => $thumbnail,
             'short_description' => $request->short_description,
             'description'       => $request->description,
+            'meta_title'       => $request->meta_title,
+            'meta_description' => $request->meta_description,
+            'meta_keywords'    => $request->meta_keywords,
             'featured'          => $request->boolean('featured'),
             'trending'          => $request->boolean('trending'),
             'status'            => $request->status,
@@ -168,14 +171,15 @@ class ProductController extends Controller
 
             'short_description'  => $request->short_description,
             'description'        => $request->description,
-
+            'meta_title'       => $request->meta_title,
+            'meta_description' => $request->meta_description,
+            'meta_keywords'    => $request->meta_keywords,
             'featured'           => $request->has('featured'),
             'trending'           => $request->has('trending'),
 
             'status'             => $request->status,
 
         ]);
-
         if ($request->hasFile('gallery')) {
 
             foreach ($request->file('gallery') as $image) {

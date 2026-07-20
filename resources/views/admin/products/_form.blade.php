@@ -19,8 +19,8 @@
 
                 <select name="category_id"
                         id="category"
-                        class="form-select">
-
+                        class="form-select"
+                        data-url="{{ url('admin/get-subcategories') }}">
                     <option value="">Select Category</option>
 
                     @foreach($categories as $category)
@@ -171,6 +171,7 @@
                 <input type="number"
                        step="0.01"
                        name="purchase_price"
+                       id="purchase_price"
                        class="form-control"
                        value="{{ old('purchase_price', $product->purchase_price ?? '') }}">
 
@@ -182,6 +183,7 @@
 
                 <input type="number"
                        step="0.01"
+                       id="mrp"
                        name="mrp"
                        class="form-control"
                        value="{{ old('mrp', $product->mrp ?? '') }}">
@@ -194,6 +196,7 @@
 
                 <input type="number"
                        step="0.01"
+                       id="selling_price"
                        name="selling_price"
                        class="form-control"
                        value="{{ old('selling_price', $product->selling_price ?? '') }}">
@@ -208,6 +211,39 @@
                        name="stock"
                        class="form-control"
                        value="{{ old('stock', $product->stock ?? 0) }}">
+
+            </div>
+
+            <div class="col-md-3 mb-3">
+
+                <label>Discount (%)</label>
+
+                <input type="text"
+                    id="discount_percent"
+                    class="form-control"
+                    readonly>
+
+            </div>
+
+            <div class="col-md-3 mb-3">
+
+                <label>Profit</label>
+
+                <input type="text"
+                    id="profit_amount"
+                    class="form-control"
+                    readonly>
+
+            </div>
+
+            <div class="col-md-3 mb-3">
+
+                <label>Profit Margin (%)</label>
+
+                <input type="text"
+                    id="profit_margin"
+                    class="form-control"
+                    readonly>
 
             </div>
 
@@ -377,6 +413,7 @@
             </label>
 
             <textarea
+                id="short_description"
                 name="short_description"
                 rows="3"
                 class="form-control">{{ old('short_description',$product->short_description ?? '') }}</textarea>
@@ -398,6 +435,125 @@
                 class="form-control">{{ old('description',$product->description ?? '') }}</textarea>
 
         </div>
+
+    </div>
+
+</div>
+
+<div class="card mb-4">
+
+    <div class="card-header bg-dark text-white">
+        <h5 class="mb-0">SEO Information</h5>
+    </div>
+
+    <div class="card-body">
+
+        <div class="mb-3">
+
+            <label>Meta Title</label>
+
+            <input
+                type="text"
+                id="meta_title"
+                name="meta_title"
+                maxlength="60"
+                class="form-control"
+                value="{{ old('meta_title',$product->meta_title ?? '') }}">
+
+            <small class="text-muted">
+
+                <span id="titleCount">0</span>/60 Characters
+
+            </small>
+
+        </div>
+
+        <div class="mb-3">
+
+            <label>Meta Description</label>
+
+            <textarea
+                id="meta_description"
+                name="meta_description"
+                rows="4"
+                maxlength="160"
+                class="form-control">{{ old('meta_description',$product->meta_description ?? '') }}</textarea>
+
+            <small class="text-muted">
+
+                <span id="descriptionCount">0</span>/160 Characters
+
+            </small>
+
+        </div>
+
+        <div class="mb-3">
+            <label>Meta Keywords</label>
+
+            <textarea
+                id="meta_keywords"
+                name="meta_keywords"
+                rows="3"
+                class="form-control"
+                placeholder="haldi, turmeric, organic, masala">{{ old('meta_keywords', $product->meta_keywords ?? '') }}</textarea>
+        </div>
+
+        <div class="mt-3">
+
+            <h6>
+
+                SEO Score
+
+            </h6>
+
+            <div class="progress">
+
+                <div id="seoScoreBar"
+                    class="progress-bar bg-danger"
+                    style="width:0%">
+
+                    0%
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<div class="card mb-4">
+
+    <div class="card-header">
+
+        Google Search Preview
+
+    </div>
+
+    <div class="card-body">
+
+        <h5 id="googleTitle"
+            style="color:#1a0dab">
+
+            Product Title
+
+        </h5>
+
+        <small style="color:green">
+
+            https://masalastore.com/product
+
+        </small>
+
+        <p id="googleDescription"
+           class="mt-2 text-muted">
+
+            Meta Description Preview...
+
+        </p>
 
     </div>
 
@@ -512,112 +668,6 @@
 
 @push('scripts')
 
-<script>
-
-$(document).ready(function () {
-
-    // ===========================
-    // Auto Slug
-    // ===========================
-    $('#name').on('keyup', function () {
-
-        let slug = $(this).val()
-            .toLowerCase()
-            .trim()
-            .replace(/\s+/g, '-')
-            .replace(/[^\w-]+/g, '');
-
-        $('#slug').val(slug);
-
-    });
-
-    // ===========================
-    // Load Sub Categories
-    // ===========================
-    $('#category').on('change', function () {
-
-        let id = $(this).val();
-
-        if (id == '') {
-
-            $('#sub_category').html('<option value="">Select Sub Category</option>');
-            return;
-        }
-
-        $.ajax({
-
-            url: "{{ url('admin/get-subcategories') }}/" + id,
-            type: "GET",
-            dataType: "json",
-
-            success: function (response) {
-
-                let html = '<option value="">Select Sub Category</option>';
-
-                $.each(response, function (index, item) {
-
-                    html += '<option value="' + item.id + '">' + item.name + '</option>';
-
-                });
-
-                $('#sub_category').html(html);
-
-            },
-
-            error: function () {
-
-                alert('Unable to load Sub Categories.');
-
-            }
-
-        });
-
-    });
-
-    // ===========================
-    // Thumbnail Preview
-    // ===========================
-    $('#thumbnail').change(function () {
-
-        let file = this.files[0];
-
-        if (file) {
-
-            $('#thumbnailPreview')
-                .attr('src', URL.createObjectURL(file))
-                .show();
-
-        }
-
-    });
-
-    // ===========================
-    // Gallery Preview
-    // ===========================
-    $('#gallery').change(function () {
-
-        $('#galleryPreview').html('');
-
-        $.each(this.files, function (index, file) {
-
-            $('#galleryPreview').append(
-
-                '<img src="' + URL.createObjectURL(file) + '" class="img-thumbnail me-2 mb-2" width="100">'
-
-            );
-
-        });
-
-    });
-
-});
-
-ClassicEditor
-.create(document.querySelector('#description'))
-.catch(error => {
-    console.error(error);
-});
-
-</script>
+<script src="{{ asset('assets/js/product.js') }}"></script>
 
 @endpush

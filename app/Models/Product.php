@@ -38,6 +38,12 @@ class Product extends Model
 
         'description',
 
+        'meta_title',
+
+        'meta_description',
+        
+        'meta_keywords',
+
         'featured',
 
         'trending',
@@ -60,7 +66,7 @@ class Product extends Model
     {
         return $this->belongsTo(Brand::class);
     }
-    
+
     public function images()
     {
         return $this->hasMany(ProductImage::class);
