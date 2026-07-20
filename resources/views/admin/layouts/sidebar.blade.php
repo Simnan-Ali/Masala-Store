@@ -24,8 +24,9 @@
         Brands
     </a>
 
-    <a href="#">
-        <i class="fa fa-box"></i> Products
+    <a href="{{ route('admin.products.index') }}">
+        <i class="fa fa-box"></i>
+        Products
     </a>
 
     <a href="#">

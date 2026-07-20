@@ -1,11 +1,12 @@
 <?php
 
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
-use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\SubCategoryController;
 use App\Http\Controllers\Admin\BrandController;
+use App\Http\Controllers\Admin\ProductController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -34,6 +35,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('categories', CategoryController::class);
         Route::resource('sub-categories', SubCategoryController::class);
         Route::resource('brands', BrandController::class);
+        Route::resource('products', ProductController::class);
+        Route::get( 'sub-category/{category}', [ProductController::class,'getSubCategories']
+        )->name('products.subcategories');
 
         Route::post('/logout', [AuthController::class, 'logout'])
             ->name('logout');
