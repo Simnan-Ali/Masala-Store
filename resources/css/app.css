@@ -1,0 +1,49 @@
+@import 'bootstrap/dist/css/bootstrap.min.css';
+@import '@fortawesome/fontawesome-free/css/all.min.css';
+@import 'datatables.net-bs5/css/dataTables.bootstrap5.min.css';
+
+body{
+    background:#f4f6f9;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.sidebar{
+    min-height:100vh;
+    background:#212529;
+}
+
+.sidebar a{
+    color:#fff;
+    text-decoration:none;
+    display:block;
+    padding:12px 20px;
+}
+
+.sidebar a:hover{
+    background:#343a40;
+}
+
+.content{
+    min-height:100vh;
+}
+
+.vh-100{
+    min-height:100vh;
+}
+
+.card{
+    border-radius:15px;
+}
+
+.card-header{
+    border-radius:15px 15px 0 0 !important;
+}
+
+.form-control{
+    height:48px;
+}
+
+.btn-dark{
+    height:48px;
+    font-weight:bold;
+}
