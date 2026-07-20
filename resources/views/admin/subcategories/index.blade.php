@@ -15,110 +15,115 @@
     </div>
 
     <div class="card-body">
-        <form method="GET" action="{{ route('admin.sub-categories.index') }}" class="row mb-3">
+        <form method="GET" action="{{ route('admin.sub-categories.index') }}" class="mb-4">
 
-            <div class="col-md-4">
-                <input type="text"
-                    name="search"
-                    value="{{ request('search') }}"
-                    class="form-control"
-                    placeholder="Search Sub Category...">
-            </div>
+            <div class="row g-3">
 
-            <div class="col-md-3">
-                <button type="submit" class="btn btn-primary">
-                    <i class="fa fa-search"></i> Search
-                </button>
+                <div class="col-lg-5 col-md-6">
+                    <input
+                        type="text"
+                        name="search"
+                        value="{{ request('search') }}"
+                        class="form-control"
+                        placeholder="🔍 Search Sub Category...">
+                </div>
 
-                @if(request()->filled('search'))
-                    <a href="{{ route('admin.sub-categories.index') }}" class="btn btn-danger">
-                        <i class="fa fa-times"></i> Clear Filter
-                    </a>
-                @endif
+                <div class="col-lg-auto col-md-auto d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa fa-search me-1"></i> Search
+                    </button>
+
+                    @if(request()->filled('search'))
+                        <a href="{{ route('admin.sub-categories.index') }}" class="btn btn-outline-danger">
+                            <i class="fa fa-refresh me-1"></i> Clear
+                        </a>
+                    @endif
+                </div>
+
             </div>
 
         </form>
-        <table id="subCategoryTable" class="table table-bordered table-hover">
-            <thead class="table-dark">
+        <div class="table-responsive">
+            <table id="subCategoryTable" class="table table-bordered table-hover">
+                <thead class="table-dark">
 
-                <tr>
+                    <tr>
 
-                    <th>#</th>
+                        <th>#</th>
 
-                    <th>Image</th>
+                        <th>Image</th>
 
-                    <th>Category</th>
+                        <th>Category</th>
 
-                    <th>Name</th>
+                        <th>Name</th>
 
-                    <th>Status</th>
+                        <th>Status</th>
 
-                    <th>Action</th>
+                        <th>Action</th>
 
-                </tr>
+                    </tr>
 
-            </thead>
+                </thead>
 
-            <tbody>
+                <tbody>
 
-                @foreach($subCategories as $subCategory)
+                    @foreach($subCategories as $subCategory)
 
-                <tr>
+                    <tr>
 
-                    <td>{{ $loop->iteration }}</td>
+                        <td>{{ $loop->iteration }}</td>
 
-                    <td>
+                        <td>
 
-                        @if($subCategory->image)
+                            @if($subCategory->image)
 
-                        <img src="{{ asset('storage/'.$subCategory->image) }}" width="60"> @endif
+                            <img src="{{ asset('storage/'.$subCategory->image) }}" width="60"> @endif
 
-                    </td>
+                        </td>
 
-                    <td>{{ $subCategory->category->name }}</td>
+                        <td>{{ $subCategory->category->name }}</td>
 
-                    <td>{{ $subCategory->name }}</td>
+                        <td>{{ $subCategory->name }}</td>
 
-                    <td>
+                        <td>
 
-                        @if($subCategory->status)
+                            @if($subCategory->status)
 
-                        <span class="badge bg-success">Active</span> @else
+                            <span class="badge bg-success">Active</span> @else
 
-                        <span class="badge bg-danger">Inactive</span> @endif
+                            <span class="badge bg-danger">Inactive</span> @endif
 
-                    </td>
+                        </td>
+                        <td>
 
-                    <td>
+                            <a href="{{ route('admin.sub-categories.edit',$subCategory) }}" class="btn btn-warning btn-sm">
 
-                        <a href="{{ route('admin.sub-categories.edit',$subCategory) }}" class="btn btn-warning btn-sm">
+                                <i class="fa fa-edit"></i>
 
-                        Edit
+                            </a>
 
-                        </a>
+                            <form class="deleteForm d-inline" method="POST" action="{{ route('admin.sub-categories.destroy',$subCategory) }}">
 
-                        <form class="deleteForm" action="{{ route('admin.sub-categories.destroy',$subCategory) }}" method="POST">
+                                @csrf @method('DELETE')
 
-                            @csrf @method('DELETE')
+                                <button class="btn btn-danger btn-sm">
 
-                            <button class="btn btn-danger btn-sm">
+                                    <i class="fa fa-trash"></i>
 
-                                Delete
+                                </button>
 
-                            </button>
+                            </form>
 
-                        </form>
+                        </td>
 
-                    </td>
+                    </tr>
 
-                </tr>
+                    @endforeach
 
-                @endforeach
+                </tbody>
 
-            </tbody>
-
-        </table>
-
+            </table>
+        </div>
         {{ $subCategories->links('pagination::bootstrap-5') }}
 
     </div>
@@ -142,6 +147,5 @@
             });    
         });    
     });
-    new DataTable('#subCategoryTable');
 </script>
 @endsection

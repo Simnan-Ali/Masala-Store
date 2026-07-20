@@ -29,144 +29,142 @@
 
         @endif
 
-        <form method="GET"
-            action="{{ route('admin.categories.index') }}"
-            class="row mb-3">
+        <form method="GET" action="{{ route('admin.categories.index') }}" class="mb-4">
 
-            <div class="col-md-4">
-                <input type="text"
-                    class="form-control"
-                    name="search"
-                    placeholder="Search Category..."
-                    value="{{ request('search') }}">
-            </div>
+            <div class="row g-3">
 
-            <div class="col-md-3">
-                <button type="submit" class="btn btn-primary">
-                    <i class="fa fa-search"></i> Search
-                </button>
+                <div class="col-lg-5 col-md-6">
+                    <input
+                        type="text"
+                        name="search"
+                        value="{{ request('search') }}"
+                        class="form-control"
+                        placeholder="🔍 Search Category...">
+                </div>
 
-                @if(request()->filled('search'))
-                    <a href="{{ route('admin.categories.index') }}" class="btn btn-danger">
-                        <i class="fa fa-times"></i> Clear Filter
-                    </a>
-                @endif
+                <div class="col-lg-auto col-md-auto d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa fa-search me-1"></i> Search
+                    </button>
+
+                    @if(request()->filled('search'))
+                        <a href="{{ route('admin.categories.index') }}" class="btn btn-outline-danger">
+                            <i class="fa fa-refresh me-1"></i> Clear
+                        </a>
+                    @endif
+                </div>
+
             </div>
 
         </form>
-        <table id="categoryTable" class="table table-bordered table-hover">
-            <thead class="table-dark">
-
-            <tr>
-
-                <th>#</th>
-
-                <th>Image</th>
-
-                <th>Name</th>
-
-                <th>Slug</th>
-
-                <th>Status</th>
-
-                <th width="180">Action</th>
-
-            </tr>
-
-            </thead>
-
-            <tbody>
-
-            @forelse($categories as $category)
+        <div class="table-responsive">
+            <table id="categoryTable" class="table table-bordered table-hover">
+                <thead class="table-dark">
 
                 <tr>
 
-                    <td>{{ $loop->iteration }}</td>
+                    <th>#</th>
 
-                    <td>
+                    <th>Image</th>
 
-                        @if($category->image)
+                    <th>Name</th>
 
-                            <img src="{{ asset('storage/'.$category->image) }}"
-                                 width="70">
+                    <th>Slug</th>
 
-                        @endif
+                    <th>Status</th>
 
-                    </td>
-
-                    <td>{{ $category->name }}</td>
-
-                    <td>{{ $category->slug }}</td>
-
-                    <td>
-
-                        @if($category->status)
-
-                        <span class="badge bg-success">
-
-                        Active
-
-                        </span>
-
-                        @else
-
-                        <span class="badge bg-danger">
-
-                        Inactive
-
-                        </span>
-
-                        @endif
-
-                    </td>
-
-                    <td>
-
-                        <a href="{{ route('admin.categories.edit',$category) }}"
-                           class="btn btn-warning btn-sm">
-
-                            Edit
-
-                        </a>
-
-                        <form class="deleteForm"
-                            action="{{ route('admin.categories.destroy',$category) }}"
-                            method="POST">
-
-                        @csrf
-
-                        @method('DELETE')
-
-                        <button class="btn btn-danger btn-sm">
-
-                        Delete
-
-                        </button>
-
-                        </form>
-
-                    </td>
+                    <th width="180">Action</th>
 
                 </tr>
 
-            @empty
+                </thead>
 
-                <tr>
+                <tbody>
 
-                    <td colspan="6" class="text-center">
+                @forelse($categories as $category)
 
-                        No Categories Found
+                    <tr>
 
-                    </td>
+                        <td>{{ $loop->iteration }}</td>
 
-                </tr>
+                        <td>
 
-            @endforelse
+                            @if($category->image)
 
-            </tbody>
+                                <img src="{{ asset('storage/'.$category->image) }}"
+                                    width="70">
 
-        </table>
+                            @endif
 
+                        </td>
+
+                        <td>{{ $category->name }}</td>
+
+                        <td>{{ $category->slug }}</td>
+
+                        <td>
+
+                            @if($category->status)
+
+                            <span class="badge bg-success">
+
+                            Active
+
+                            </span>
+
+                            @else
+
+                            <span class="badge bg-danger">
+
+                            Inactive
+
+                            </span>
+
+                            @endif
+
+                        </td>
+                        <td>
+
+                            <a href="{{ route('admin.categories.edit',$category) }}" class="btn btn-warning btn-sm">
+
+                                <i class="fa fa-edit"></i>
+
+                            </a>
+
+                            <form class="deleteForm d-inline" method="POST" action="{{ route('admin.categories.destroy',$category) }}">
+
+                                @csrf @method('DELETE')
+
+                                <button class="btn btn-danger btn-sm">
+
+                                    <i class="fa fa-trash"></i>
+
+                                </button>
+
+                            </form>
+
+                        </td>
+
+                    </tr>
+
+                @empty
+
+                    <tr>
+
+                        <td colspan="6" class="text-center">
+
+                            No Categories Found
+
+                        </td>
+
+                    </tr>
+
+                @endforelse
+
+                </tbody>
+
+            </table>
+        </div>
         {{ $categories->links('pagination::bootstrap-5') }}
 
 
@@ -192,8 +190,5 @@ document .querySelectorAll('.deleteForm').forEach(function(form){
         });
     });
 });
-
-new DataTable('#categoryTable');
-
 </script>
 @endsection

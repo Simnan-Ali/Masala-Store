@@ -28,164 +28,167 @@
 
         @endif
 
-        <form method="GET" action="{{ route('admin.brands.index') }}" class="row mb-3">
+        <form method="GET" action="{{ route('admin.brands.index') }}" class="mb-4">
+            <div class="row g-3">
 
-            <div class="col-md-4">
-                <input type="text"
-                    name="search"
-                    value="{{ request('search') }}"
-                    class="form-control"
-                    placeholder="Search Brand">
-            </div>
+                <div class="col-lg-5 col-md-6">
+                    <input
+                        type="text"
+                        name="search"
+                        value="{{ request('search') }}"
+                        class="form-control"
+                        placeholder="🔍 Search Brand...">
+                </div>
 
-            <div class="col-md-3">
-                <button type="submit" class="btn btn-primary">
-                    <i class="fa fa-search"></i> Search
-                </button>
-                @if(request()->filled('search'))
-                    <a href="{{ route('admin.brands.index') }}" class="btn btn-danger">
-                        <i class="fa fa-times"></i> Clear Filter
-                    </a>
-                @endif
-            </div>
+                <div class="col-lg-auto col-md-auto d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa fa-search me-1"></i> Search
+                    </button>
 
-        </form>
-
-        <table id="brandTable" class="table table-bordered table-hover">
-
-            <thead class="table-dark">
-
-                <tr>
-
-                    <th>#</th>
-
-                    <th>Logo</th>
-
-                    <th>Name</th>
-
-                    <th>Slug</th>
-
-                    <th>Description</th>
-
-                    <th>Status</th>
-
-                    <th width="180">Action</th>
-
-                </tr>
-
-            </thead>
-
-            <tbody>
-
-                @forelse($brands as $brand)
-
-                <tr>
-
-                    <td>{{ $loop->iteration }}</td>
-
-                    <td>
-
-                        @if($brand->logo)
-
-                        <img src="{{ asset('storage/'.$brand->logo) }}" width="70" class="rounded"> @else
-
-                        <span class="text-muted">
-
-                                No Logo
-
-                            </span> @endif
-
-                    </td>
-
-                    <td>
-
-                        {{ $brand->name }}
-
-                    </td>
-
-                    <td>
-
-                        {{ $brand->slug }}
-
-                    </td>
-
-                    <td>
-
-                        {{ Str::limit($brand->description,40) }}
-
-                    </td>
-
-                    <td>
-
-                        @if($brand->status)
-
-                        <span class="badge bg-success">
-
-                                Active
-
-                            </span> @else
-
-                        <span class="badge bg-danger">
-
-                                Inactive
-
-                            </span> @endif
-
-                    </td>
-
-                    <td>
-
-                        <a href="{{ route('admin.brands.edit',$brand) }}" class="btn btn-warning btn-sm">
-
-                            <i class="fa fa-edit"></i>
-
+                    @if(request()->filled('search'))
+                        <a href="{{ route('admin.brands.index') }}" class="btn btn-outline-danger">
+                            <i class="fa fa-refresh me-1"></i> Clear
                         </a>
+                    @endif
+                </div>
 
-                        <form class="deleteForm d-inline" action="{{ route('admin.brands.destroy',$brand) }}" method="POST">
+            </div>
+        </form>
+        <div class="table-responsive">
+            <table id="brandTable" class="table table-bordered table-hover">
 
-                            @csrf @method('DELETE')
+                <thead class="table-dark">
 
-                            <button class="btn btn-danger btn-sm">
+                    <tr>
 
-                                <i class="fa fa-trash"></i>
+                        <th>#</th>
 
-                            </button>
+                        <th>Logo</th>
 
-                        </form>
+                        <th>Name</th>
 
-                    </td>
+                        <th>Slug</th>
 
-                </tr>
+                        <th>Description</th>
 
-                @empty
+                        <th>Status</th>
 
-                <tr>
+                        <th width="180">Action</th>
 
-                    <td colspan="7" class="text-center">
+                    </tr>
 
-                        No Brand Found
+                </thead>
 
-                    </td>
+                <tbody>
 
-                </tr>
+                    @forelse($brands as $brand)
 
-                @endforelse
+                    <tr>
 
-            </tbody>
+                        <td>{{ $loop->iteration }}</td>
 
-        </table>
+                        <td>
 
+                            @if($brand->logo)
+
+                            <img src="{{ asset('storage/'.$brand->logo) }}" width="70" class="rounded"> @else
+
+                            <span class="text-muted">
+
+                                    No Logo
+
+                                </span> @endif
+
+                        </td>
+
+                        <td>
+
+                            {{ $brand->name }}
+
+                        </td>
+
+                        <td>
+
+                            {{ $brand->slug }}
+
+                        </td>
+
+                        <td>
+
+                            {{ Str::limit($brand->description,40) }}
+
+                        </td>
+
+                        <td>
+
+                            @if($brand->status)
+
+                            <span class="badge bg-success">
+
+                                    Active
+
+                                </span> @else
+
+                            <span class="badge bg-danger">
+
+                                    Inactive
+
+                                </span> @endif
+
+                        </td>
+
+                        <td>
+
+                            <a href="{{ route('admin.brands.edit',$brand) }}" class="btn btn-warning btn-sm">
+
+                                <i class="fa fa-edit"></i>
+
+                            </a>
+
+                            <form class="deleteForm d-inline" action="{{ route('admin.brands.destroy',$brand) }}" method="POST">
+
+                                @csrf @method('DELETE')
+
+                                <button class="btn btn-danger btn-sm">
+
+                                    <i class="fa fa-trash"></i>
+
+                                </button>
+
+                            </form>
+
+                        </td>
+
+                    </tr>
+
+                    @empty
+
+                    <tr>
+
+                        <td colspan="7" class="text-center">
+
+                            No Brand Found
+
+                        </td>
+
+                    </tr>
+
+                    @endforelse
+
+                </tbody>
+
+            </table>
+        </div>
         {{ $brands->links('pagination::bootstrap-5') }}
 
     </div>
 
 </div>
 
-@endsection @push('scripts')
+@endsection
+@push('scripts')
 
 <script>
-    new DataTable('#brandTable');
-
     document.querySelectorAll('.deleteForm').forEach(function(form){    
         form.addEventListener('submit',function(e){    
             e.preventDefault();    
